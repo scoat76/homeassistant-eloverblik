@@ -20,8 +20,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.util import Throttle
-from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle, dt as dt_util
 from pyeloverblik.models import TimeSeries
 from .__init__ import HassEloverblik, MIN_TIME_BETWEEN_UPDATES
 from .const import DOMAIN, CURRENCY_KRONER_PER_KILO_WATT_HOUR
@@ -43,41 +42,30 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
     async_add_entities(sensors)
 
-class EloverblikEnergy(Entity):
+class EloverblikEnergy(SensorEntity):
     """Representation of an energy sensor."""
+
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
     def __init__(self, name, sensor_type, client, hour=None):
         """Initialize the sensor."""
-        self._state = None
         self._data_date = None
         self._data = client
         self._hour = hour
-        self._name = name
         self._sensor_type = sensor_type
+        self._attr_name = name
+        self._attr_native_value = None
 
         if sensor_type == 'hour':
-            self._unique_id = f"{self._data.get_metering_point()}-{hour}"
+            self._attr_unique_id = f"{self._data.get_metering_point()}-{hour}"
         elif sensor_type == 'total':
-            self._unique_id = f"{self._data.get_metering_point()}-total"
+            self._attr_unique_id = f"{self._data.get_metering_point()}-total"
         elif sensor_type == 'year_total':
-            self._unique_id = f"{self._data.get_metering_point()}-year-total"
+            self._attr_unique_id = f"{self._data.get_metering_point()}-year-total"
         else:
             raise ValueError(f"Unexpected sensor_type: {sensor_type}.")
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def unique_id(self):
-        """The unique id of the sensor."""
-        return self._unique_id
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
 
     @property
     def extra_state_attributes(self):
@@ -88,11 +76,6 @@ class EloverblikEnergy(Entity):
 
         return attributes
 
-    @property
-    def unit_of_measurement(self):
-        """Return the unit of measurement."""
-        return UnitOfEnergy.KILO_WATT_HOUR
-
     def update(self):
         """Fetch new state data for the sensor.
         This is the only method that should fetch new data for Home Assistant.
@@ -102,53 +85,36 @@ class EloverblikEnergy(Entity):
         self._data_date = self._data.get_data_date()
 
         if self._sensor_type == 'hour':
-            self._state = self._data.get_usage_hour(self._hour)
+            self._attr_native_value = self._data.get_usage_hour(self._hour)
         elif self._sensor_type == 'total':
-            self._state = self._data.get_total_day()
+            self._attr_native_value = self._data.get_total_day()
         elif self._sensor_type == 'year_total':
-            self._state = self._data.get_total_year()
+            self._attr_native_value = self._data.get_total_year()
         else:
             raise ValueError(f"Unexpected sensor_type: {self._sensor_type}.")
 
-class MeterReading(Entity):
+class MeterReading(SensorEntity):
     """Representation of a meter reading sensor."""
+
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
     def __init__(self, name, client):
         """Initialize the sensor."""
-        self._state = None
         self._data_date = None
         self._data = client
-        self._name = name
+        self._attr_name = name
+        self._attr_native_value = None
 
-        self._unique_id = f"{self._data.get_metering_point()}-meter-reading"
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def unique_id(self):
-        """The unique id of the sensor."""
-        return self._unique_id
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
+        self._attr_unique_id = f"{self._data.get_metering_point()}-meter-reading"
 
     @property
     def extra_state_attributes(self):
         """Return state attributes."""
         attributes = dict()
         attributes['meter_reading_date'] = self._data_date
-        
         return attributes
-
-    @property
-    def unit_of_measurement(self):
-        """Return the unit of measurement."""
-        return UnitOfEnergy.KILO_WATT_HOUR
 
     def update(self):
         """Fetch new state data for the sensor.
@@ -157,33 +123,21 @@ class MeterReading(Entity):
         self._data.update_meter_reading()       
 
         self._data_date = self._data.meter_reading_date()
-        self._state = self._data.meter_reading()
+        self._attr_native_value = self._data.meter_reading()
 
-class EloverblikTariff(Entity):
+class EloverblikTariff(SensorEntity):
     """Representation of an energy sensor."""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = CURRENCY_KRONER_PER_KILO_WATT_HOUR
 
     def __init__(self, name, client):
         """Initialize the sensor."""
-        self._state = None
         self._data = client
         self._data_hourly_tariff_sums = [0] * 24
-        self._name = name
-        self._unique_id = f"{self._data.get_metering_point()}-tariff-sum"
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def unique_id(self):
-        """The unique id of the sensor."""
-        return self._unique_id
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
+        self._attr_name = name
+        self._attr_unique_id = f"{self._data.get_metering_point()}-tariff-sum"
+        self._attr_native_value = None
 
     @property
     def extra_state_attributes(self):
@@ -206,7 +160,8 @@ class EloverblikTariff(Entity):
         self._data.update_tariffs()
 
         self._data_hourly_tariff_sums = [self._data.get_tariff_sum_hour(h) for h in range(1, 25)]
-        self._state = self._data_hourly_tariff_sums[datetime.now().hour]
+        current_hour = dt_util.now().hour
+        self._attr_native_value = self._data_hourly_tariff_sums[current_hour]
 
 
 class EloverblikStatistic(SensorEntity):

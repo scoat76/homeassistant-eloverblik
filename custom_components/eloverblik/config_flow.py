@@ -51,6 +51,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 metering_point = user_input["metering_point"]
                 await self.async_set_unique_id(metering_point)
+                self._abort_if_unique_id_configured()
                 return self.async_create_entry(title=info["title"], data=user_input)
 
             except CannotConnect:
