@@ -54,7 +54,11 @@ A sensor for each over hour in the past 24 hours is created with the syntax:
  * etc.
 
 A sensor which sum up the total energy usage is added as well:
- * `sensor.eloverblik_energy_total`
+ * `sensor.eloverblik_energy_total` — yesterday’s total consumption (kWh) as provided by ElOverblik’s latest-day endpoint
+ * `sensor.eloverblik_energy_year_total` — month-by-month totals for the current year (kWh)
+ * `sensor.eloverblik_tariff_sum` with hourly tariff attributes (in `kr/kWh`)
+ * `sensor.eloverblik_meter_reading` (deprecated endpoint; currently unavailable because the ElOverblik customer API has removed meter-reading support)
+ * `sensor.eloverblik_energy_statistic` (cumulative long-term statistics source for the Energy dashboard)
 
 All sensors show their value in kWh.
 
@@ -167,16 +171,15 @@ The integration will pull current and last years data from Eloverblik and insert
 it into the long-term statistics in HomeAssistant.
 
 An entity with the id `sensor.eloverblik_energy_statistic` is created, 
-this entity will **always** have an `unknown` value, since if a current value is set, 
-the recorder will try to write it to the statistics. 
+this entity exposes a cumulative kWh total (`state_class: total_increasing`) and imports long-term statistics. The state shown is simply the last cumulative sum imported; the Energy dashboard reads the long-term statistics, not the instantaneous state.
 
-> **_NOTE:_**  This is not the ideal setup, but it does enable owners that do not have live access to their measurements to get the data into home-assitant.
-
-But the entity will have a valid long-term statistic.
-
-The statistic will continually be updateed daily.
+The statistic will continually be updated daily.
 
 > **_NOTE:_**  The data will be delayed between 1 and 3 days, depending on your local grid operator (DSO).
+
+### Using it in the Energy dashboard
+
+Point the Energy dashboard “Electricity grid consumption” source to `sensor.eloverblik_energy_statistic`. Because the sensor provides long-term statistics with a cumulative kWh sum, it fulfills the Energy dashboard requirements; the visible state is just the latest cumulative sum for convenience.
 
 Below are two examples of UI yaml configuration to display the values.
 

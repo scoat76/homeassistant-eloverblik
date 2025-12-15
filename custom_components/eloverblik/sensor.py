@@ -106,6 +106,7 @@ class MeterReading(SensorEntity):
         self._data = client
         self._attr_name = name
         self._attr_native_value = None
+        self._attr_available = True
 
         self._attr_unique_id = f"{self._data.get_metering_point()}-meter-reading"
 
@@ -124,6 +125,7 @@ class MeterReading(SensorEntity):
 
         self._data_date = self._data.meter_reading_date()
         self._attr_native_value = self._data.meter_reading()
+        self._attr_available = False
 
 class EloverblikTariff(SensorEntity):
     """Representation of an energy sensor."""
@@ -170,12 +172,13 @@ class EloverblikStatistic(SensorEntity):
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.TOTAL
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     def __init__(self, hass_eloverblik: HassEloverblik):
         self._attr_name = "Eloverblik Energy Statistic"
         self._attr_unique_id = f"{hass_eloverblik.get_metering_point()}-statistic"
         self._hass_eloverblik = hass_eloverblik
+        self._attr_native_value = None
 
     async def async_will_remove_from_hass(self) -> None:
         """Cleanup callback to remove statistics when deleting entity"""
@@ -255,6 +258,11 @@ class EloverblikStatistic(SensorEntity):
 
         if len(statistics) > 0:
             async_import_statistics(self.hass, metadata, statistics)
+            # Expose the current cumulative total as the entity state for Energy dashboard friendliness.
+            self._attr_native_value = total
+        else:
+            # Keep state untouched if nothing new was imported.
+            _LOGGER.debug("No new statistics to import from Eloverblik")
 
     async def _get_last_stat(self, hass: HomeAssistant) -> StatisticData:
         last_stats = await get_instance(hass).async_add_executor_job(
