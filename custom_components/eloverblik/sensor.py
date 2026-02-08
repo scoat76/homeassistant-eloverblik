@@ -46,7 +46,7 @@ class EloverblikEnergy(SensorEntity):
     """Representation of an energy sensor."""
 
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
     def __init__(self, name, sensor_type, client, hour=None):
