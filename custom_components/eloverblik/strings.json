@@ -3,9 +3,10 @@
     "title": "Eloverblik",
     "step": {
       "user": {
-        "title": "Connect to the device",
+        "title": "Enter refresh token and metering point",
         "data": {
-          "host": "Host"
+          "refresh_token": "Refresh Token",
+          "metering_point": "Metering Point"
         }
       }
     },

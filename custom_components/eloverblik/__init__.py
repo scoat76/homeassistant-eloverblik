@@ -65,6 +65,7 @@ class HassEloverblik:
         self._year_data = None
         self._tariff_data = None
         self._meter_reading_data = None
+        self._meter_reading_endpoint_disabled_logged = False
 
     def get_total_day(self):
         if self._day_data != None:
@@ -103,7 +104,7 @@ class HassEloverblik:
                 _LOGGER.warn(f"Error from eloverblik while getting historic data: {raw_data.status} - {raw_data.body}")
         except requests.exceptions.HTTPError as he:
             message = None
-            if he.response.status_code == 401:
+            if he.response.status_code in (401, 403):
                 message = f"Unauthorized error while accessing eloverblik.dk. Wrong or expired refresh token?"
             else:
                 e = sys.exc_info()[1]
@@ -170,7 +171,7 @@ class HassEloverblik:
                 _LOGGER.warn(f"Error from eloverblik when getting year data: {year_data.status} - {year_data.detailed_status}")
         except requests.exceptions.HTTPError as he:
             message = None
-            if he.response.status_code == 401:
+            if he.response.status_code in (401, 403):
                 message = f"Unauthorized error while accessing eloverblik.dk. Wrong or expired refresh token?"
             else:
                 e = sys.exc_info()[1]
@@ -195,7 +196,7 @@ class HassEloverblik:
                 _LOGGER.warn(f"Error from eloverblik when getting tariff data: {tariff_data.status} - {tariff_data.detailed_status}")
         except requests.exceptions.HTTPError as he:
             message = None
-            if he.response.status_code == 401:
+            if he.response.status_code in (401, 403):
                 message = f"Unauthorized error while accessing eloverblik.dk. Wrong or expired refresh token?"
             else:
                 e = sys.exc_info()[1]
@@ -210,25 +211,11 @@ class HassEloverblik:
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update_meter_reading(self):
-        _LOGGER.debug("Fetching meter reading data from Eloverblik")
-
-        try: 
-            meter_reading_data = self._client.get_meter_reading_latest(self._metering_point)
-            if meter_reading_data.status == 200:
-                self._meter_reading_data = meter_reading_data
-            else:
-                _LOGGER.info(f"Error from eloverblik when getting meter reading data: {meter_reading_data.status} - {meter_reading_data.detailed_status}. This is not a bug. Just an indication that data is not available in Eloverblik.dk.")
-        except requests.exceptions.HTTPError as he:
-            message = None
-            if he.response.status_code == 401:
-                message = f"Unauthorized error while accessing eloverblik.dk. Wrong or expired refresh token?"
-            else:
-                e = sys.exc_info()[1]
-                message = f"Exception: {e}"
-
-            _LOGGER.warn(message)
-        except: 
-            e = sys.exc_info()[1]
-            _LOGGER.warn(f"Exception: {e}")
-
-        _LOGGER.debug("Done fetching meter reading data from Eloverblik")
+        """No-op because the customer API meter reading endpoint is deprecated."""
+        if not self._meter_reading_endpoint_disabled_logged:
+            _LOGGER.info(
+                "Meter reading endpoint in customer API is deprecated and no longer operational. "
+                "Skipping meter reading updates."
+            )
+            self._meter_reading_endpoint_disabled_logged = True
+        self._meter_reading_data = None
