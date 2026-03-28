@@ -11,6 +11,7 @@
       }
     },
     "error": {
+      "empty_field": "Refresh token and metering point ID cannot be empty.",
       "cannot_connect": "Could not reach Eloverblik or metering point returned an error. Check ID and try again.",
       "invalid_auth": "Invalid or expired refresh token.",
       "rate_limited": "Too many requests (429). Wait a minute and try again.",

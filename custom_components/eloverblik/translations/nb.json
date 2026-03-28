@@ -11,6 +11,7 @@
       }
     },
     "error": {
+      "empty_field": "Refresh token og målepunkt-ID kan ikke være tomme.",
       "cannot_connect": "Kunne ikke nå Eloverblik eller målepunktet returnerte feil. Sjekk ID og prøv igjen.",
       "invalid_auth": "Ugyldig eller utløpt refresh token.",
       "rate_limited": "For mange forespørsler (429). Vent ett minutt og prøv igjen.",

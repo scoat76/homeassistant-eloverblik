@@ -11,34 +11,15 @@ from homeassistant import config_entries, core, exceptions
 from pyeloverblik.eloverblik import Eloverblik
 
 from .const import DOMAIN  # pylint:disable=unused-import
+from .normalize import normalize_entry_data
 
 _LOGGER = logging.getLogger(__name__)
 
-
-def _normalize_refresh_token(value: str) -> str:
-    """Fjern ledende/hale-mellemrum (almindeligt ved kopiering)."""
-    return str(value).strip()
-
-
-def _normalize_metering_point(value: str) -> str:
-    """Fjern alle mellemrum/tegn der ligner mellemrum — målepunkt-ID kopieres ofte formateret."""
-    return "".join(str(value).split())
-
-
-def normalize_entry_data(data: dict) -> dict:
-    """Rens felter før validering og før de gemmes i config entry."""
-    return {
-        "refresh_token": _normalize_refresh_token(data["refresh_token"]),
-        "metering_point": _normalize_metering_point(data["metering_point"]),
-    }
-
-
+# Kun simple typer — vol.All med egne callables giver 500 i UI ved skemagenerering.
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("refresh_token"): vol.All(str, _normalize_refresh_token, vol.Length(min=1)),
-        vol.Required("metering_point"): vol.All(
-            str, _normalize_metering_point, vol.Length(min=1)
-        ),
+        vol.Required("refresh_token"): str,
+        vol.Required("metering_point"): str,
     }
 )
 
@@ -90,26 +71,31 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            try:
-                user_input = normalize_entry_data(user_input)
-                info = await validate_input(self.hass, user_input)
-                metering_point = user_input["metering_point"]
-                await self.async_set_unique_id(metering_point)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(title=info["title"], data=user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidAuth:
-                errors["base"] = "invalid_auth"
-            except RateLimited:
-                errors["base"] = "rate_limited"
-            except DatahubUnavailable:
-                errors["base"] = "datahub_unavailable"
-            except exceptions.HomeAssistantError:
-                raise
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
+            user_input = normalize_entry_data(user_input)
+            if not user_input["refresh_token"] or not user_input["metering_point"]:
+                errors["base"] = "empty_field"
+            else:
+                try:
+                    info = await validate_input(self.hass, user_input)
+                    metering_point = user_input["metering_point"]
+                    await self.async_set_unique_id(metering_point)
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(
+                        title=info["title"], data=user_input
+                    )
+                except CannotConnect:
+                    errors["base"] = "cannot_connect"
+                except InvalidAuth:
+                    errors["base"] = "invalid_auth"
+                except RateLimited:
+                    errors["base"] = "rate_limited"
+                except DatahubUnavailable:
+                    errors["base"] = "datahub_unavailable"
+                except exceptions.HomeAssistantError:
+                    raise
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected exception")
+                    errors["base"] = "unknown"
 
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors

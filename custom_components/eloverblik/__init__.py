@@ -9,8 +9,8 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .config_flow import normalize_entry_data
 from .const import DOMAIN
+from .normalize import normalize_entry_data
 from .coordinator import EloverblikDataUpdateCoordinator
 from .data import HassEloverblik
 
