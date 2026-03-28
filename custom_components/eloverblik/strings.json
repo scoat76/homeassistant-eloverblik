@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Connect to Eloverblik",
-        "description": "Use a refresh token and metering point ID from eloverblik.dk (Data sharing).",
+        "description": "Use a refresh token and metering point ID from eloverblik.dk (API access).",
         "data": {
           "refresh_token": "Refresh token",
           "metering_point": "Metering point ID"
