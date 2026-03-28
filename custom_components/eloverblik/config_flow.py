@@ -14,10 +14,31 @@ from .const import DOMAIN  # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def _normalize_refresh_token(value: str) -> str:
+    """Fjern ledende/hale-mellemrum (almindeligt ved kopiering)."""
+    return str(value).strip()
+
+
+def _normalize_metering_point(value: str) -> str:
+    """Fjern alle mellemrum/tegn der ligner mellemrum — målepunkt-ID kopieres ofte formateret."""
+    return "".join(str(value).split())
+
+
+def normalize_entry_data(data: dict) -> dict:
+    """Rens felter før validering og før de gemmes i config entry."""
+    return {
+        "refresh_token": _normalize_refresh_token(data["refresh_token"]),
+        "metering_point": _normalize_metering_point(data["metering_point"]),
+    }
+
+
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("refresh_token"): str,
-        vol.Required("metering_point"): str,
+        vol.Required("refresh_token"): vol.All(str, _normalize_refresh_token, vol.Length(min=1)),
+        vol.Required("metering_point"): vol.All(
+            str, _normalize_metering_point, vol.Length(min=1)
+        ),
     }
 )
 
@@ -70,6 +91,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
+                user_input = normalize_entry_data(user_input)
                 info = await validate_input(self.hass, user_input)
                 metering_point = user_input["metering_point"]
                 await self.async_set_unique_id(metering_point)

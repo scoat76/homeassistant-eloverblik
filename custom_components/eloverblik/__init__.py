@@ -9,6 +9,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
+from .config_flow import normalize_entry_data
 from .const import DOMAIN
 from .coordinator import EloverblikDataUpdateCoordinator
 from .data import HassEloverblik
@@ -28,8 +29,13 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Eloverblik from a config entry."""
-    refresh_token = entry.data["refresh_token"]
-    metering_point = entry.data["metering_point"]
+    raw = dict(entry.data)
+    data = normalize_entry_data(raw)
+    if data != raw:
+        hass.config_entries.async_update_entry(entry, data=data)
+
+    refresh_token = data["refresh_token"]
+    metering_point = data["metering_point"]
 
     hass_eloverblik = HassEloverblik(refresh_token, metering_point)
     coordinator = EloverblikDataUpdateCoordinator(hass, entry, hass_eloverblik)

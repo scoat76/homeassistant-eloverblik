@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Forbind til Eloverblik",
-        "description": "Brug refresh token og målepunkt-ID fra eloverblik.dk (Datadeling).",
+        "description": "Brug refresh token og målepunkt-ID fra eloverblik.dk (Datadeling). Mellemrum fjernes automatisk fra begge felter.",
         "data": {
           "refresh_token": "Refresh token",
           "metering_point": "Målepunkt Id-nummer"
