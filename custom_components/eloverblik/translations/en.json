@@ -3,17 +3,17 @@
     "step": {
       "user": {
         "title": "Connect to Eloverblik",
-        "description": "Use a refresh token and metering point ID from eloverblik.dk (API access).",
+        "description": "Use a Token and Metering Point ID from eloverblik.dk (API access).",
         "data": {
-          "refresh_token": "Refresh token",
-          "metering_point": "Metering point ID"
+          "refresh_token": "Token",
+          "metering_point": "Metering Point ID"
         }
       }
     },
     "error": {
-      "empty_field": "Refresh token and metering point ID cannot be empty.",
+      "empty_field": "Token and Metering Point ID cannot be empty.",
       "cannot_connect": "Could not reach Eloverblik or metering point returned an error. Check ID and try again.",
-      "invalid_auth": "Invalid or expired refresh token.",
+      "invalid_auth": "Invalid or expired Token.",
       "rate_limited": "Too many requests (429). Wait a minute and try again.",
       "datahub_unavailable": "DataHub / Eloverblik is temporarily unavailable (503). Try again later.",
       "unknown": "Unexpected error"

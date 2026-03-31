@@ -3,17 +3,17 @@
     "step": {
       "user": {
         "title": "Forbind til Eloverblik",
-        "description": "Brug refresh token og målepunkt-ID fra eloverblik.dk (API-adgang).",
+        "description": "Brug Token og Målepunkt Id-nummer fra eloverblik.dk (API-adgang).",
         "data": {
-          "refresh_token": "Refresh token",
+          "refresh_token": "Token",
           "metering_point": "Målepunkt Id-nummer"
         }
       }
     },
     "error": {
-      "empty_field": "Refresh token og målepunkt-ID må ikke være tomme.",
+      "empty_field": "Token og Målepunkt Id-nummer må ikke være tomme.",
       "cannot_connect": "Kunne ikke nå Eloverblik eller målepunktet returnerede fejl. Tjek ID og prøv igen.",
-      "invalid_auth": "Ugyldig eller udløbet refresh token.",
+      "invalid_auth": "Ugyldig eller udløbet Token.",
       "rate_limited": "For mange forespørgsler (429). Vent et minut og prøv igen.",
       "datahub_unavailable": "DataHub / Eloverblik er midlertidigt utilgængelig (503). Prøv senere.",
       "unknown": "Uventet fejl"
