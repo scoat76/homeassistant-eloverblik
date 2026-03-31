@@ -189,7 +189,7 @@ class EloverblikTariff(CoordinatorEntity[EloverblikDataUpdateCoordinator], Senso
 class EloverblikApiStatusSensor(
     CoordinatorEntity[EloverblikDataUpdateCoordinator], SensorEntity
 ):
-    """Menneskelig læsbar API-/poll-status uden at åbne logfiler."""
+    """Human-readable API / poll status without reading logs."""
 
     _attr_icon = "mdi:cloud-check-outline"
     _attr_should_poll = False
@@ -200,7 +200,7 @@ class EloverblikApiStatusSensor(
         device_info: DeviceInfo,
     ) -> None:
         super().__init__(coordinator)
-        self._attr_name = "Eloverblik API-status"
+        self._attr_name = "Eloverblik API status"
         self._attr_device_info = device_info
         self._attr_unique_id = (
             f"{coordinator.hass_eloverblik.get_metering_point()}-api-status"
@@ -215,10 +215,10 @@ class EloverblikApiStatusSensor(
         if not self.coordinator.last_update_success:
             exc = getattr(self.coordinator, "last_exception", None)
             if exc:
-                return f"Fejl: {exc}"
-            return "Fejl: seneste opdatering mislykkedes"
+                return f"Error: {exc}"
+            return "Error: last update failed"
         if self.coordinator.statistic_last_error:
-            return f"OK (statistik: {self.coordinator.statistic_last_error})"
+            return f"OK (statistics: {self.coordinator.statistic_last_error})"
         return "OK"
 
     @property
@@ -226,16 +226,16 @@ class EloverblikApiStatusSensor(
         c = self.coordinator
         data = c.data or {}
         return {
-            "sidste_statistik_succes": c.statistic_last_success.isoformat()
+            "last_statistic_success": c.statistic_last_success.isoformat()
             if c.statistic_last_success
             else None,
-            "sidste_statistik_fejl": c.statistic_last_error,
-            "poll_advarsler": data.get("warnings", []),
+            "last_statistic_error": c.statistic_last_error,
+            "poll_warnings": data.get("warnings", []),
         }
 
 
 class EloverblikStatistic(SensorEntity):
-    """Importerer timeforbrug til langtidsstatistik / energidashboard."""
+    """Import hourly use into long-term statistics / energy dashboard."""
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
@@ -260,8 +260,15 @@ class EloverblikStatistic(SensorEntity):
     def available(self) -> bool:
         return True
 
+    def _on_coordinator_update(self) -> None:
+        """Re-try statistic import when the data coordinator refreshes."""
+        self.hass.async_create_task(self.async_update())
+
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
+        self.async_on_remove(
+            self._coordinator.async_add_listener(self._on_coordinator_update)
+        )
         self.hass.async_create_task(self.async_update())
 
     async def async_will_remove_from_hass(self) -> None:
@@ -269,7 +276,7 @@ class EloverblikStatistic(SensorEntity):
         await super().async_will_remove_from_hass()
 
     async def async_update(self) -> None:
-        """Opdater historik når der er gået nok tid og ny data kan findes."""
+        """Update history when enough time has passed and new data may exist."""
         now = datetime.now(timezone.utc)
         last_stat = await self._get_last_stat(self.hass)
         if last_stat is not None:
@@ -302,7 +309,7 @@ class EloverblikStatistic(SensorEntity):
         )
 
         if data is None:
-            msg = "Ingen timeseries-data fra Eloverblik (se log for detaljer)."
+            msg = "No time series data from Eloverblik (see log for details)."
             self._coordinator.set_statistic_error(msg)
             _LOGGER.debug("No hourly data returned from Eloverblik for statistics")
             return

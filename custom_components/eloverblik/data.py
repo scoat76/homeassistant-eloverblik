@@ -131,8 +131,8 @@ class HassEloverblik:
                         "warnings": warnings,
                         "http_status": day_data.status,
                         "critical_message": (
-                            f"Eloverblik afviste forbrugsdata ({day_data.status}). "
-                            "Tjek refresh token og målepunkt."
+                            f"Eloverblik rejected consumption data ({day_data.status}). "
+                            "Check refresh token and metering point."
                         ),
                     }
 
@@ -186,8 +186,8 @@ class HassEloverblik:
                 "warnings": warnings,
                 "http_status": http_status,
                 "critical_message": (
-                    "Kunne ikke hente dagsforbrug fra Eloverblik. "
-                    "Tjek token, målepunkt og om data findes hos netselskab."
+                    "Could not fetch daily consumption from Eloverblik. "
+                    "Check token, metering point, and whether data exists at the grid operator."
                 ),
             }
 

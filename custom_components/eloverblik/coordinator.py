@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class EloverblikDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
-    """Fetch forbrug, tariffer og måleraflæsning; status til UI."""
+    """Poll consumption, tariffs, meter reading; expose status for UI."""
 
     config_entry: ConfigEntry
 
@@ -49,15 +49,15 @@ class EloverblikDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             code = err.response.status_code if err.response is not None else None
             self._last_poll_http_status = code
             if code == 401:
-                raise UpdateFailed("Ugyldig eller udløbet refresh token (401).") from err
+                raise UpdateFailed("Invalid or expired refresh token (401).") from err
             if code == 429:
-                raise UpdateFailed("For mange forespørgsler mod Eloverblik (429). Vent og prøv igen.") from err
+                raise UpdateFailed("Too many requests to Eloverblik (429). Wait and retry.") from err
             if code == 503:
-                raise UpdateFailed("DataHub / Eloverblik midlertidigt utilgængelig (503).") from err
-            raise UpdateFailed(f"HTTP-fejl mod Eloverblik: {err}") from err
+                raise UpdateFailed("DataHub / Eloverblik temporarily unavailable (503).") from err
+            raise UpdateFailed(f"HTTP error from Eloverblik: {err}") from err
         except requests.RequestException as err:
             self._last_poll_http_status = None
-            raise UpdateFailed(f"Ingen forbindelse til Eloverblik: {err}") from err
+            raise UpdateFailed(f"Cannot reach Eloverblik: {err}") from err
 
         self._last_poll_http_status = result.get("http_status")
         if result.get("critical_message"):
@@ -65,12 +65,12 @@ class EloverblikDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return result
 
     def set_statistic_error(self, message: str | None) -> None:
-        """Kald fra statistik-sensor ved import-fejl."""
+        """Called from statistic entity when import fails."""
         self.statistic_last_error = message
         self.async_update_listeners()
 
     def set_statistic_success(self, when: datetime) -> None:
-        """Kald når statistik-import lykkes."""
+        """Called when statistic import succeeds."""
         self.statistic_last_error = None
         self.statistic_last_success = when
         self.async_update_listeners()

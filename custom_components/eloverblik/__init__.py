@@ -3,13 +3,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
+from .diagnostics import async_get_config_entry_diagnostics  # noqa: F401
 from .normalize import normalize_entry_data
 from .coordinator import EloverblikDataUpdateCoordinator
 from .data import HassEloverblik
@@ -66,29 +66,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
-
-
-async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant, entry: ConfigEntry
-) -> dict[str, Any]:
-    """Diagnostik til UI (download diagnostics)."""
-    info = hass.data.get(DOMAIN, {}).get(entry.entry_id)
-    if not info:
-        return {"error": "Ingen aktiv integration for denne post."}
-
-    coordinator: EloverblikDataUpdateCoordinator = info["coordinator"]
-    he: HassEloverblik = info["hass_eloverblik"]
-
-    last_exc = getattr(coordinator, "last_exception", None)
-
-    return {
-        "metering_point": entry.data.get("metering_point"),
-        "last_update_success": coordinator.last_update_success,
-        "last_exception": repr(last_exc) if last_exc else None,
-        "statistic_last_error": coordinator.statistic_last_error,
-        "statistic_last_success": coordinator.statistic_last_success.isoformat()
-        if coordinator.statistic_last_success
-        else None,
-        "last_data_warnings": coordinator.data.get("warnings") if coordinator.data else [],
-        "day_data_date": he.get_data_date(),
-    }
