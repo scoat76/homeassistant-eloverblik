@@ -1,14 +1,25 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "data": {
-                    "refresh_token": "Oppdater Token",
-                    "metering_point": "Målepunkt"
-                },
-                "title": "Angi oppdateringstoken og målepunkt"
-            }
-        },
-        "title": "Eloverblik"
+  "config": {
+    "step": {
+      "user": {
+        "title": "Koble til Eloverblik",
+        "description": "Bruk Oppdater Token og målepunkt-ID fra eloverblik.dk (API-tilgang).",
+        "data": {
+          "refresh_token": "Oppdater Token",
+          "metering_point": "Målepunkt-ID"
+        }
+      }
+    },
+    "error": {
+      "empty_field": "Oppdater Token og målepunkt-ID kan ikke være tomme.",
+      "cannot_connect": "Kunne ikke nå Eloverblik eller målepunktet returnerte feil. Sjekk ID og prøv igjen.",
+      "invalid_auth": "Ugyldig eller utløpt Oppdater Token.",
+      "rate_limited": "For mange forespørsler (429). Vent ett minutt og prøv igjen.",
+      "datahub_unavailable": "DataHub / Eloverblik er midlertidig utilgjengelig (503). Prøv senere.",
+      "unknown": "Uventet feil"
+    },
+    "abort": {
+      "already_configured": "Dette målepunktet er allerede konfigurert"
     }
+  }
 }

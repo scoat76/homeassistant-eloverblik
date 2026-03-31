@@ -1,4 +1,5 @@
 {
-    "name": "Eloverblik",
-    "render_readme": true
+  "name": "Eloverblik",
+  "render_readme": true,
+  "homeassistant": "2024.8.0"
 }
