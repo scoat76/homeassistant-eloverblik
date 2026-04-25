@@ -3,8 +3,8 @@
   "name": "Eloverblik",
   "version": "0.6.1",
   "config_flow": true,
-  "documentation": "https://github.com/JonasPed/homeassistant-eloverblik",
-  "issue_tracker": "https://github.com/JonasPed/homeassistant-eloverblik/issues",
+  "documentation": "https://github.com/scoat76/homeassistant-eloverblik",
+  "issue_tracker": "https://github.com/scoat76/homeassistant-eloverblik/issues",
   "requirements": [
     "pyeloverblik==0.4.4"
   ],
@@ -13,6 +13,6 @@
   "homekit": {},
   "dependencies": [],
   "codeowners": [
-    "@JonasPed"
+    "@scoat76"
   ]
 }
