@@ -26,7 +26,7 @@ This repository is an actively maintained copy/fork of the original `JonasPed/ho
   1. Ensure that [HACS](https://hacs.xyz/) is installed.
   2. Search for and install the `eloverblik` integration through HACS.
      * Or use this shortcut  
-     [![Open your Home Assistant instance and open a the Eloverblik repository inside the Home Assistant Community Store](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JonasPed&repository=homeassistant-eloverblik&category=integration)
+     [![Open your Home Assistant instance and open a the Eloverblik repository inside the Home Assistant Community Store](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=scoat76&repository=homeassistant-eloverblik&category=integration)
   3. Restart Home Assistant (Settings → ⋮ (the top-right 3-dot menu) → Restart Home Assistant → Restart Home Assistant → Restart).
   4. [Configure](#configuration) Eloverblik through Settings → Devices & Services → Add Integration.
      * Or use this shortcut  
