@@ -9,6 +9,7 @@ The `eloverblik` component is a Home Assistant custom component for monitoring y
 This repository is an actively maintained copy/fork of the original `JonasPed/homeassistant-eloverblik` project. The original author is no longer actively developing the component. To avoid issues and delays with getting PRs approved and merged in the original source, all future development and bug fixes will take place directly in this repository.
 
 * [Click here to view the newly added technical documentation / architectural analysis for AI agents.](docs/documentation.md)
+* [How to set up the Home Assistant Energy Dashboard with Eloverblik](docs/energy_dashboard_setup.md)
 
 ## Installation
 
